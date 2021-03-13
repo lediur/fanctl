@@ -1,4 +1,5 @@
 # fanctl
+
 Automatic PID fan control for remote IPMI on Debian with Supermicro X9DRi-LN4F+
 
 ## Why
@@ -30,21 +31,23 @@ In my setup, the peripheral zone controls a 140mm fan wall mounted in front of t
 ## Results
 
 ### Temperatures
+
 At idle, with a 24℃ ambient temperature, this setup keeps average drive temperatures around the temperature set point (37C as of writing) with ~40-60% duty cycle with average workloads.
 
 ### Noise levels
+
 According to the NIOSH SLM app on my phone, the ambient noise level of my apartment is ~34 dB(A). When measured 3 feet from the server cabinet, at the entry to my closet, I measured these figures using `spintest`:
 
-|Combined duty cycle|Noise (in dB(A))|
-|---|---|
-|100%|56|
-|90%|55|
-|80%|53|
-|70%|49|
-|60%|45.7|
-|50%|42.6|
-|40%|38|
-|30%|34.5|
+| Combined duty cycle | Noise (in dB(A)) |
+| ------------------- | ---------------- |
+| 100%                | 56               |
+| 90%                 | 55               |
+| 80%                 | 53               |
+| 70%                 | 49               |
+| 60%                 | 45.7             |
+| 50%                 | 42.6             |
+| 40%                 | 38               |
+| 30%                 | 34.5             |
 
 Since the cabinet is in a closet with an open doorway, the noise is only audible in the adjacent room if the duty cycle is above 60%, or above 40% when standing in front of it.
 
@@ -55,4 +58,5 @@ Since the cabinet is in a closet with an open doorway, the noise is only audible
   - portability with .env file
   - remote IPMI
   - service for systemctl
+  - shellcheck and formatting
 - https://www.youtube.com/embed/0UjyL6ZiMkI
