@@ -49,5 +49,9 @@ Since the cabinet is in a closet with an open doorway, the noise is only audible
 
 ## Inspirations
 
-- https://www.truenas.com/community/threads/fan-scripts-for-supermicro-boards-using-pid-logic.51054/page-13#post-551335
+- Largely based on https://www.truenas.com/community/threads/fan-scripts-for-supermicro-boards-using-pid-logic.51054/page-13#post-551335, with modifications:
+  - made it work under Debian (original was intended for FreeBSD)
+  - portability with .env file
+  - remote IPMI
+  - service for systemctl
 - https://www.youtube.com/embed/0UjyL6ZiMkI
