@@ -1,5 +1,5 @@
 # fanctl
-Automatic fan control for remote IPMI on Debian with Supermicro X9DRi-LN4F+
+Automatic PID fan control for remote IPMI on Debian with Supermicro X9DRi-LN4F+
 
 ## Why
 
