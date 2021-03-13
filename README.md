@@ -13,6 +13,7 @@ In my setup, the peripheral zone controls a 140mm fan wall mounted in front of t
 
 - clone this repo into somewhere reasonable (I used `/opt/fanctl`)
 - (optional) set up a .env file to override tuning parameters and logging so you don't have to edit the scripts to do so. read the scripts for tunable params
+- (optional if you don't use ZFS) edit the `spinpid2z.service` unit and remove the dependency on `zfs.service`. I added that dependency to make sure my logs land properly.
 - `sudo ln -s /opt/fanctl/spinpid2z.service /etc/systemd/system/spinpid2z.service`
 - `sudo systemctl enable spinpid2z`
 - `sudo systemctl start spinpid2z`
