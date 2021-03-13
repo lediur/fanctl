@@ -471,7 +471,7 @@ while true; do
         RESET=1
         MSG=$(printf "\n%s\n" "BMC reset: RPMs were too low for DUTY_PER -- DUTY_PER=$DUTY_PER; RPM_PER=${!RPM_PER}")
     fi
-    if [ $RESET == 1 ]; then
+    if [[ "$RESET" -eq 1 ]]; then
         $IPMITOOL bmc reset cold
         echo "$MSG"
         sleep 120 # mine takes 105 seconds to reset
