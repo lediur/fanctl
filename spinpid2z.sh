@@ -141,7 +141,7 @@ function read_fan_data() {
 
     # Read fan mode, convert to decimal, get text equivalent.
     MODE=$($IPMITOOL raw 0x30 0x45 0) # in hex with leading space
-    MODE=$((0x"$MODE"))               # strip leading space and decimalize
+    MODE=$((0x$(echo $MODE)))         # strip leading space and decimalize
     # Text for mode
     case $MODE in
     0) MODEt="Standard" ;;
