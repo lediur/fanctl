@@ -1,0 +1,12 @@
+[Unit]
+Description=spinpid2z 
+Documentation=https://www.truenas.com/community/threads/fan-scripts-for-supermicro-boards-using-pid-logic.51054/page-13#post-551335
+Wants=zfs.target
+
+[Service]
+ExecStart=/opt/fanctl/spinpid2z.sh
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
