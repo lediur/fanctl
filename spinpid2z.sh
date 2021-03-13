@@ -17,10 +17,6 @@ IPMITOOL="/usr/bin/ipmitool"
 # Change to your desired log location/name:
 LOG=/tmp/fanctl_spinpid2z.log
 
-# Where do you want output to go?  Comment/uncomment (#) to select.  First sends output to the log file AND to screen/console.  Second sends it only to the log file, so no feedback if running manually.  In the first, if you want to append to existing log, add '-a' to the tee command.
-exec > >(tee -i $LOG) 2>&1		# Log + console
-# exec &> $LOG						# Log only
-
 # CPU output sent to a separate log for interim cycles
 # It can get big so turn off after testing. 1 = log cpu, anything else = don't log cpu
 # CPU_LOG_YES=1
@@ -86,7 +82,14 @@ CPU_SCALE=3  # Integer only!
 
 set -a
 source <(cat .env | sed -e '/^#/d;/^\s*$/d' -e "s/'/'\\\''/g" -e "s/=\(.*\)/='\1'/g")
-set +a 
+set +a
+
+################## Setup logging ################
+
+# Where do you want output to go?  Comment/uncomment (#) to select.  First sends output to the log file AND to screen/console.  Second sends it only to the log file, so no feedback if running manually.  In the first, if you want to append to existing log, add '-a' to the tee command.
+exec > >(tee -i $LOG) 2>&1		# Log + console
+# exec &> $LOG						# Log only
+
 
 ##############################################
 # function get_disk_name
