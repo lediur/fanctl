@@ -35,6 +35,7 @@ At idle, with a 24℃ ambient temperature, this setup keeps average drive temper
 According to the NIOSH SLM app on my phone, the ambient noise level of my apartment is ~34 dB(A). When measured 3 feet from the server cabinet, at the entry to my closet, I measured these figures using `spintest`:
 
 |Combined duty cycle|Noise (in dB(A))|
+|---|---|
 |100%|56|
 |90%|55|
 |80%|53|
