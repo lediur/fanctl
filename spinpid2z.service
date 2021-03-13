@@ -4,6 +4,7 @@ Documentation=https://www.truenas.com/community/threads/fan-scripts-for-supermic
 Wants=zfs.target
 
 [Service]
+WorkingDirectory=/opt/fanctl
 ExecStart=/opt/fanctl/spinpid2z.sh
 User=root
 Group=root
