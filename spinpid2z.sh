@@ -19,7 +19,7 @@ LOG=/tmp/fanctl_spinpid2z.log
 
 # CPU output sent to a separate log for interim cycles
 # It can get big so turn off after testing. 1 = log cpu, anything else = don't log cpu
-# CPU_LOG_YES=1
+CPU_LOG_YES=0
 
 # Path/name of cpu log
 # CPU_LOG=/mnt/MyPool/MyDataSet/MyDirectory/cpu.log
@@ -199,7 +199,7 @@ function CPU_check_adjust {
    if [[ $CPU_T -gt 2 ]]; then
 	sleep $CPU_T
    else
-	sleep ($CPU_T - 1)
+	   sleep $(($CPU_T - 1))
    fi
 	
 	if [ $CPU_LOG_YES == 1 ] ; then
@@ -467,7 +467,7 @@ while true ; do
 		RESET=1
 		MSG=printf "\n%s\n" "BMC reset: RPMs were too low for DUTY_PER -- DUTY_PER=$DUTY_PER; RPM_PER=${!RPM_PER}"
 	fi
-	if [ RESET == 1 ] ; then
+	if [ $RESET == 1 ] ; then
 		$IPMITOOL bmc reset cold
 		echo $MSG
 		sleep 120	# mine takes 105 seconds to reset
