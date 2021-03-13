@@ -196,7 +196,11 @@ function CPU_check_adjust {
       
    adjust_fans $ZONE_CPU $DUTY_CPU $DUTY_CPU_LAST
 
+   if [[ $CPU_T -gt 2 ]]; then
 	sleep $CPU_T
+   else
+	sleep ($CPU_T - 1)
+   fi
 	
 	if [ $CPU_LOG_YES == 1 ] ; then
 		print_interim_CPU | tee -a $CPU_LOG >/dev/null
@@ -443,7 +447,7 @@ while true ; do
    fi
    
    DRIVES_check_adjust
-   sleep 5  # Let fans equilibrate to duty before reading fans and testing for reset
+   sleep 3  # Let fans equilibrate to duty before reading fans and testing for reset
    read_fan_data
    FIRST_TIME=0
 
