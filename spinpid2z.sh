@@ -175,9 +175,11 @@ function CPU_check_adjust() {
 
     # Only works on FreeBSD
     # Find hottest CPU core
+    # echo "Checking core temperatures"
     MAX_CORE_TEMP=0
+    SDR_OUTPUT=$($IPMITOOL sdr)
     for CORE in $(seq 0 "$CORES"); do
-        CORE_TEMP="$($IPMITOOL sdr | grep "CPU${CORE} Temp" | grep -Eo '[0-9]{2,5}')"
+        CORE_TEMP="$(echo "$SDR_OUTPUT" | grep "CPU${CORE} Temp" | grep -Eo '[0-9]{2,5}')"
         if [[ $CORE_TEMP -gt $MAX_CORE_TEMP ]]; then MAX_CORE_TEMP=$CORE_TEMP; fi
     done
     CPU_TEMP=$MAX_CORE_TEMP
@@ -191,8 +193,10 @@ function CPU_check_adjust() {
     if [[ $DUTY_CPU -gt $DUTY_CPU_MAX ]]; then DUTY_CPU=$DUTY_CPU_MAX; fi
     if [[ $DUTY_CPU -lt $DUTY_CPU_MIN ]]; then DUTY_CPU=$DUTY_CPU_MIN; fi
 
+    # echo "Checking fans"
     adjust_fans $ZONE_CPU $DUTY_CPU "$DUTY_CPU_LAST"
 
+    # echo "Sleeping for $CPU_T"
     if [[ $CPU_T -gt 2 ]]; then
         sleep $CPU_T
     else
@@ -359,7 +363,7 @@ fi
 # -1 because numbering starts at 0
 CORES=$(($(nproc) - 1))
 
-CPU_LOOPS=$(bc <<<"$DRIVE_T * 60 / $CPU_T") # Number of whole CPU loops per drive loop
+CPU_LOOPS=$(bc <<<"$DRIVE_T * 30 / $CPU_T") # Number of whole CPU loops per drive loop
 ERRc=0                                      # Initialize errors to 0
 FIRST_TIME=1
 
