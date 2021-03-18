@@ -363,7 +363,7 @@ fi
 # -1 because numbering starts at 0
 CORES=$(($(nproc) - 1))
 
-CPU_LOOPS=$(bc <<<"$DRIVE_T * 30 / $CPU_T") # Number of whole CPU loops per drive loop
+CPU_LOOPS=$(bc <<<"$DRIVE_T * 45 / $CPU_T") # Number of whole CPU loops per drive loop
 ERRc=0                                      # Initialize errors to 0
 FIRST_TIME=1
 
