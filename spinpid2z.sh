@@ -475,6 +475,10 @@ while true; do
         RESET=1
         MSG=$(printf "\n%s\n" "BMC reset: RPMs were too low for DUTY_PER -- DUTY_PER=$DUTY_PER; RPM_PER=${!RPM_PER}")
     fi
+    if [[ (${!RPM_PER} -lt RPM_PER_30) || (${!RPM_CPU} -lt RPM_CPU_30) ]]; then
+        RESET=1
+        MSG=$(printf "\n%s\n" "BMC reset: RPMs below minimum threshold")
+    fi
     if [[ "$RESET" -eq 1 ]]; then
         $IPMITOOL bmc reset cold
         echo "$MSG"
