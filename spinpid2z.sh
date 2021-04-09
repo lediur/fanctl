@@ -368,8 +368,10 @@ ERRc=0                                      # Initialize errors to 0
 FIRST_TIME=1
 
 # Alter RPM thresholds to allow some slop
+RPM_CPU_LOW=$RPM_CPU_30
 RPM_CPU_30=$(echo "scale=0; 1.2 * $RPM_CPU_30 / 1" | bc)
 RPM_CPU_MAX=$(echo "scale=0; 0.8 * $RPM_CPU_MAX / 1" | bc)
+RPM_PER_LOW=$RPM_PER_LOW
 RPM_PER_30=$(echo "scale=0; 1.2 * $RPM_PER_30 / 1" | bc)
 RPM_PER_MAX=$(echo "scale=0; 0.8 * $RPM_PER_MAX / 1" | bc)
 
@@ -475,7 +477,7 @@ while true; do
         RESET=1
         MSG=$(printf "\n%s\n" "BMC reset: RPMs were too low for DUTY_PER -- DUTY_PER=$DUTY_PER; RPM_PER=${!RPM_PER}")
     fi
-    if [[ (${!RPM_PER} -lt RPM_PER_30) || (${!RPM_CPU} -lt RPM_CPU_30) ]]; then
+    if [[ (${!RPM_PER} -lt RPM_PER_LOW) || (${!RPM_CPU} -lt RPM_CPU_LOW) ]]; then
         RESET=1
         MSG=$(printf "\n%s\n" "BMC reset: RPMs below minimum threshold")
     fi
