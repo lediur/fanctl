@@ -220,7 +220,12 @@ function compute_setpoint_from_ambient() {
     original_sp=$2
 
     if (($(echo "$ambient_temp > 15" | bc -l))) && (($(echo "$ambient_temp < 45" | bc -l))); then
-    	echo $(bc <<<"scale=2; ($ambient_temp + $AMBIENT_COEFF) / 1")
+    	computed_sp=$(bc <<<"scale=2; ($ambient_temp + $AMBIENT_COEFF) / 1")
+	if (($(echo "$computed_sp < $original_sp" | bc -l))); then
+	    echo $original_sp
+	else
+	    echo $computed_sp
+	fi
     else
 	printf "Missing or invalid ambient temp!\n"
 	USE_AMBIENT_TEMP=0
