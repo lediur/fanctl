@@ -11,6 +11,8 @@ VERSION="2021-03-12"
 ##############################################
 
 IPMITOOL="/usr/bin/ipmitool"
+TEMPTOOL="/opt/fanctl/temptool.sh"
+USE_AMBIENT_TEMP=0
 
 #################  OUTPUT SETTINGS ################
 
@@ -63,6 +65,10 @@ DRIVE_T=1
 # Tunable constants for drive control (see comments at end of script)
 Kp=4  #  Proportional tunable constant
 Kd=40 #  Derivative tunable constant
+
+# Ambient temperature difference (i.e. the ideal difference between a drive temp
+# and ambient temperature). Determine empirically.
+AMBIENT_COEFF=12 
 
 #################  CPU SETTINGS ################
 
@@ -208,6 +214,20 @@ function CPU_check_adjust() {
     fi
 }
 
+# Compute a new setpoint from ambient temperature
+function compute_setpoint_from_ambient() {
+    ambient_temp=$1
+    original_sp=$2
+
+    if (($(echo "$ambient_temp > 15" | bc -l))) && (($(echo "$ambient_temp < 45" | bc -l))); then
+    	echo $(bc <<<"scale=2; ($ambient_temp + $AMBIENT_COEFF) / 1")
+    else
+	printf "Missing or invalid ambient temp!\n"
+	USE_AMBIENT_TEMP=0
+	echo $original_sp
+    fi
+}
+
 ##############################################
 # function DRIVES_check_adjust
 # Print time on new log line.
@@ -267,10 +287,18 @@ function DRIVES_check_adjust() {
         # summarize, calculate PD and print Tmax and Tmean
         # Need value if all drives had been spun down last time
         if [[ $ERRc == "" ]]; then ERRc=0; fi
+	
+	# Adjust SP for ambient temperature if using
+	if [[ $USE_AMBIENT_TEMP == 1 ]]; then
+	    AMBIENT_TEMP=$($TEMPTOOL)
+	    adjusted_SP=$(compute_setpoint_from_ambient $AMBIENT_TEMP $SP)
+	else
+	    adjusted_SP=$SP
+	fi
 
         Tmean=$(bc <<<"scale=2; $Tsum / $i")
         ERRp=$ERRc # save previous error before calculating current
-        ERRc=$(bc <<<"scale=2; ($Tmean - $SP) / 1")
+        ERRc=$(bc <<<"scale=2; ($Tmean - $adjusted_SP) / 1")
         P=$(bc <<<"scale=3; ($Kp * $ERRc) / 1")
         D=$(bc <<<"scale=4; $Kd * ($ERRc - $ERRp) / $DRIVE_T")
         PD=$(bc <<<"$P + $D") # add corrections
@@ -299,6 +327,11 @@ function DRIVES_check_adjust() {
 
     # print current Tmax, Tmean
     printf "^%-3s %5s" "${Tmax:---}" "${Tmean:----}"
+
+    if [[ $USE_AMBIENT_TEMP -eq 1 ]]; then
+	# print ambient and computed temp
+        printf "🌡️%5s %-3s" "${AMBIENT_TEMP:---}" "${adjusted_SP:----}"
+    fi
 }
 
 ##############################################
@@ -357,6 +390,22 @@ if [[ CPU_LOG_YES -eq 1 ]]; then
     printf "Logging CPU to: %s\n" $CPU_LOG
 else
     printf "Not logging CPU entries\n"
+fi
+
+if [[ USE_AMBIENT_TEMP -eq 1 ]]; then
+    printf "Using ambient temperature from sensor\n"
+    printf "Temperature tool: $TEMPTOOL\n"
+    # failsafe if the temperature tool is not valid
+    AMBIENT_TEMP=$($TEMPTOOL)
+    if (($(echo "$AMBIENT_TEMP > 15" | bc -l))) && (($(echo "$AMBIENT_TEMP < 45" | bc -l))); then
+        printf "Raw ambient temperature: $AMBIENT_TEMP°C\n"
+        printf "Ambient drive temp adjustment: $AMBIENT_COEFF°C\n"
+    else
+	printf "Missing temp or temp out of bounds, reverting to standard behavior\n"
+	USE_AMBIENT_TEMP=0
+    fi
+else
+    printf "Not using ambient temperature\n"
 fi
 
 # Get number of CPU cores to check for temperature
