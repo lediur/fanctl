@@ -4,6 +4,10 @@
 VERSION="2021-03-12"
 # Run as superuser. See notes at end.
 
+# "strict" mode
+set -euo pipefail
+IFS=$'\n\t'
+
 ##############################################
 #
 #  Settings
@@ -93,7 +97,7 @@ set +a
 ################## Setup logging ################
 
 # Where do you want output to go?  Comment/uncomment (#) to select.  First sends output to the log file AND to screen/console.  Second sends it only to the log file, so no feedback if running manually.  In the first, if you want to append to existing log, add '-a' to the tee command.
-exec > >(tee -i $LOG) 2>&1 # Log + console
+exec > >(tee -ia $LOG) 2>&1 # Log + console
 # exec &> $LOG						# Log only
 
 ##############################################
