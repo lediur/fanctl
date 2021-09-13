@@ -72,7 +72,7 @@ Kd=40 #  Derivative tunable constant
 
 # Ambient temperature difference (i.e. the ideal difference between a drive temp
 # and ambient temperature). Determine empirically.
-AMBIENT_COEFF=12 
+AMBIENT_COEFF=12
 
 #################  CPU SETTINGS ################
 
@@ -151,7 +151,8 @@ function read_fan_data() {
 
     # Read fan mode, convert to decimal, get text equivalent.
     MODE=$($IPMITOOL raw 0x30 0x45 0) # in hex with leading space
-    MODE=$((0x$(echo $MODE)))         # strip leading space and decimalize
+    TRIMMED_MODE="${MODE#"${MODE%%[![:space:]]*}"}"
+    MODE=$((0x$(echo $TRIMMED_MODE)))         # strip leading space and decimalize
     # Text for mode
     case $MODE in
     0) MODEt="Standard" ;;
@@ -188,10 +189,12 @@ function CPU_check_adjust() {
     # echo "Checking core temperatures"
     MAX_CORE_TEMP=0
     SDR_OUTPUT=$($IPMITOOL sdr)
-    for CORE in $(seq 0 "$CORES"); do
+    set +eo pipefail
+    for CORE in $(seq 1 "$CORES"); do
         CORE_TEMP="$(echo "$SDR_OUTPUT" | grep "CPU${CORE} Temp" | grep -Eo '[0-9]{2,5}')"
         if [[ $CORE_TEMP -gt $MAX_CORE_TEMP ]]; then MAX_CORE_TEMP=$CORE_TEMP; fi
     done
+    set -eo pipefail
     CPU_TEMP=$MAX_CORE_TEMP
 
     DUTY_CPU_LAST=$DUTY_CPU
@@ -253,6 +256,7 @@ function DRIVES_check_adjust() {
     Tmax=0
     Tsum=0 # initialize drive temps for new loop through drives
     i=0    # initialize count of spinning drives
+    set +e
     while read -r LINE; do
         get_disk_name
         # echo "Device ID: $DEVID"
@@ -281,6 +285,7 @@ function DRIVES_check_adjust() {
         fi
         printf "%s%-2d  " "$STATUS" "$TEMP"
     done <<<"$DEVLIST"
+    set -e
 
     DUTY_PER_LAST=$DUTY_PER
 
@@ -296,7 +301,7 @@ function DRIVES_check_adjust() {
         # summarize, calculate PD and print Tmax and Tmean
         # Need value if all drives had been spun down last time
         if [[ $ERRc == "" ]]; then ERRc=0; fi
-	
+
 	# Adjust SP for ambient temperature if using
 	if [[ $USE_AMBIENT_TEMP == 1 ]]; then
 	    AMBIENT_TEMP=$($TEMPTOOL)
@@ -429,7 +434,7 @@ FIRST_TIME=1
 RPM_CPU_LOW=$RPM_CPU_30
 RPM_CPU_30=$(echo "scale=0; 1.2 * $RPM_CPU_30 / 1" | bc)
 RPM_CPU_MAX=$(echo "scale=0; 0.8 * $RPM_CPU_MAX / 1" | bc)
-RPM_PER_LOW=$RPM_PER_LOW
+RPM_PER_LOW=$RPM_PER_30
 RPM_PER_30=$(echo "scale=0; 1.2 * $RPM_PER_30 / 1" | bc)
 RPM_PER_MAX=$(echo "scale=0; 0.8 * $RPM_PER_MAX / 1" | bc)
 
@@ -474,6 +479,7 @@ fi
 # Before starting, go through the drives to report if
 # smartctl return value indicates a problem (>2).
 # Use -a so that all return values are available.
+set +e
 while read -r LINE; do
     get_disk_name
     /usr/sbin/smartctl -a -n standby "/dev/$DEVID" >/opt/fanctl/tempfile
@@ -488,6 +494,7 @@ while read -r LINE; do
         printf "*******************************************************\n"
     fi
 done <<<"$DEVLIST"
+set -e
 
 printf "\n%s %36s %s \n" "Key to drive status symbols:  * spinning;  _ standby;  ? unknown" "Version" $VERSION
 print_header
@@ -526,6 +533,8 @@ while true; do
     # Took following conditions out (fans too fast) to avoid serial resets
     #	|| (DUTY_CPU -le 30 && ${!RPM_CPU} -gt RPM_CPU_30)
     #	|| (DUTY_PER -le 30 && ${!RPM_PER} -gt RPM_PER_30)
+
+    RESET=0
 
     if [[ (DUTY_CPU -ge 95 && ${!RPM_CPU} -lt RPM_CPU_MAX) ]]; then
         RESET=1
