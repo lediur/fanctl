@@ -88,6 +88,11 @@ CPU_REF=35 # Integer only!
 #  duty cycle for each degree of temperature above CPU_REF.
 CPU_SCALE=3 # Integer only!
 
+################ Heartbeat config #################
+
+HEARTBEAT_URL=
+HEARTBEAT_INTERVAL_MINS=15
+
 ################## Load .env file ###############
 
 set -a
@@ -380,6 +385,17 @@ function print_interim_CPU() {
     printf "%7s %5d %5d \n" "${RPM:----}" "$CPU_TEMP" "$DUTY"
 }
 
+#############################################
+# function heartbeat
+# send a heartbeat signal to a server with curl
+# helpful to ensure that the fan system is still functioning
+#############################################
+function heartbeat() {
+    if [ $HEARTBEAT_ENABLE == 1 ] && [ -n $HEARTBEAT_URL ]; then
+        curl -fsS -m 10 --retry 5 -o /dev/null $HEARTBEAT_URL
+    fi
+}
+
 #####################################################
 # SETUP
 # All this happens only at the beginning
@@ -507,6 +523,8 @@ if [ $CPU_LOG_YES == 1 ]; then
     printf "%s \n%s \n%17s %5s %5s \n" "$DATE" "Printed every CPU cycle" $RPM_CPU "Temp" "Duty" | tee $CPU_LOG >/dev/null
 fi
 
+HEARTBEAT_LAST_SENT=0
+
 ###########################################
 # Main loop through drives every DRIVE_T minutes
 # and CPU every CPU_T seconds
@@ -519,6 +537,14 @@ while true; do
     R=$((HM % 600)) # remainder after dividing by 6 hours
     if ((R < DRIVE_T)); then
         print_header
+    fi
+
+    EPOCH=$(date +%s)
+    HEARTBEAT_NEXT_TIME=$((HEARTBEAT_LAST_SENT + HEARTBEAT_INTERVAL_MINS * 60))
+    if ((HEARTBEAT_NEXT_TIME < EPOCH)); then
+        # echo "next_time=$HEARTBEAT_NEXT_TIME epoch=$EPOCH interval_mins=$HEARTBEAT_INTERVAL_MINS"
+        HEARTBEAT_LAST_SENT=$EPOCH
+        heartbeat
     fi
 
     DRIVES_check_adjust
