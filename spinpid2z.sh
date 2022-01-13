@@ -265,7 +265,7 @@ function DRIVES_check_adjust() {
     while read -r LINE; do
         get_disk_name
         # echo "Device ID: $DEVID"
-        /usr/sbin/smartctl -a -n standby "/dev/$DEVID" >/opt/fanctl/tempfile
+        /usr/sbin/smartctl -a -n standby "/dev/$DEVID" >/tmp/fanctl_tempfile
         RETURN=$? # have to preserve return value or it changes
         BIT0=$((RETURN & 1))
         BIT1=$((RETURN & 2))
@@ -283,7 +283,7 @@ function DRIVES_check_adjust() {
         # Update temperatures each drive; spinners only
         if [ "$STATUS" == "*" ]; then
             # Taking 10th space-delimited field for WD, Seagate, Toshiba, Hitachi
-            TEMP=$(grep "Temperature_Celsius" /opt/fanctl/tempfile | awk '{print $10}')
+            TEMP=$(grep "Temperature_Celsius" /tmp/fanctl_tempfile | awk '{print $10}')
             ((Tsum += TEMP))
             if [[ $TEMP > $Tmax ]]; then Tmax=$TEMP; fi
             ((i += 1))
