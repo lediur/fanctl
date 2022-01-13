@@ -367,7 +367,7 @@ function adjust_fans() {
     if [[ $DUTY -ne $DUTY_LAST ]] || [[ FIRST_TIME -eq 1 ]]; then
         # Set new duty cycle. "echo -n ``" prevents newline generated in log
         # Hint: IPMI needs 0-255, not 0-100
-        SPEED=$(echo "scale=0; ($DUTY * 255) / 100" | bc)
+        SPEED=$(echo "scale=0; (($DUTY * 255) + 100 - 1) / 100" | bc)
         echo -n "$($IPMITOOL raw 0x30 0x91 0x5A 0x3 0x1"$ZONE" "$SPEED")"
     fi
 }
@@ -572,7 +572,7 @@ while true; do
     fi
     if [[ (${!RPM_PER} -lt RPM_PER_LOW) || (${!RPM_CPU} -lt RPM_CPU_LOW) ]]; then
         RESET=1
-        MSG=$(printf "\n%s\n" "BMC reset: RPMs below minimum threshold")
+        MSG=$(printf "\n%s\n%s\n%s\n" "BMC reset: RPMs below minimum threshold" "RPM_PER=${!RPM_PER}, low threshold=$RPM_PER_LOW" "RPM_CPU=${!RPM_CPU}, low threshold=$RPM_CPU_LOW")
     fi
     if [[ "$RESET" -eq 1 ]]; then
         $IPMITOOL bmc reset cold
