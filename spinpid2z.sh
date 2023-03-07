@@ -392,7 +392,7 @@ function print_interim_CPU() {
 #############################################
 function heartbeat() {
     if [ $HEARTBEAT_ENABLE == 1 ] && [ -n $HEARTBEAT_URL ]; then
-        curl -fsS -m 10 --retry 5 -o /dev/null $HEARTBEAT_URL
+        curl -fsS -m 10 --retry 5 -o /dev/null $HEARTBEAT_URL || true  # don't break the script if it can't reach the internet
     fi
 }
 
