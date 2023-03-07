@@ -2,12 +2,16 @@
 Description=spinpid2z 
 Documentation=https://www.truenas.com/community/threads/fan-scripts-for-supermicro-boards-using-pid-logic.51054/page-13#post-551335
 Wants=zfs.target
+StartLimitBurst=5
+StartLimitIntervalSec=600
 
 [Service]
 WorkingDirectory=/opt/fanctl
 ExecStart=/opt/fanctl/spinpid2z.sh
 User=root
 Group=root
+Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
